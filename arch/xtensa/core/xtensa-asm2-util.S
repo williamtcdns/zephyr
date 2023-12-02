@@ -387,6 +387,8 @@ _not_alloca:
 	j _Level1Vector
 #ifdef CONFIG_XTENSA_MMU
 _handle_tlb_miss_user:
+	j _handle_tlb_miss_kernel
+#if 0 /* disabled because there is exact same logic at _handle_tlb_miss_kernel */
 	/**
 	 * Handle TLB miss by loading the PTE page:
 	 * The way it works is, when we try to access an address that is not
@@ -401,9 +403,18 @@ _handle_tlb_miss_user:
 	 * are wired map.
 	 */
 	rsr.ptevaddr a0
+	wsr a1, ZSR_MMU_0
+	mov.n a1, a0 /* ptbase gets computed in a1 */
+	srli a1, a1, 22
+	slli a1, a1, 22
+	sub a0, a0, a1 /* computes pte_offset doing (ptevaddr - ptbase) */
+	srli a0, a0, 10
+	add a0, a0, a1 /* computes new ptevaddr doing ((pte_offset >> 10) + ptbase) */
+	rsr a1, ZSR_MMU_0
 	l32i a0, a0, 0
 	rsr a0, ZSR_A0SAVE
 	rfe
+#endif
 #ifdef CONFIG_USERSPACE
 _syscall:
 	rsr a0, ZSR_A0SAVE
@@ -442,6 +453,14 @@ _handle_tlb_miss_kernel:
 	 * we move back to using UserExceptionVector above.
 	 */
 	rsr.ptevaddr a0
+	wsr a1, ZSR_MMU_0
+	mov.n a1, a0 /* ptbase gets computed in a1 */
+	srli a1, a1, 22
+	slli a1, a1, 22
+	sub a0, a0, a1 /* computes pte_offset doing (ptevaddr - ptbase) */
+	srli a0, a0, 10
+	add a0, a0, a1 /* computes new ptevaddr doing ((pte_offset >> 10) + ptbase) */
+	rsr a1, ZSR_MMU_0
 	l32i a0, a0, 0
 	rsr a0, ZSR_A0SAVE
 	rfe
@@ -494,6 +513,14 @@ _handle_tlb_miss_dblexc:
 	 * when the CPU re-enters the double exception handler.
 	 */
 	rsr.ptevaddr a0
+	wsr a1, ZSR_MMU_0
+	mov.n a1, a0 /* ptbase gets computed in a1 */
+	srli a1, a1, 22
+	slli a1, a1, 22
+	sub a0, a0, a1 /* computes pte_offset doing (ptevaddr - ptbase) */
+	srli a0, a0, 10
+	add a0, a0, a1 /* computes new ptevaddr doing ((pte_offset >> 10) + ptbase) */
+	rsr a1, ZSR_MMU_0
 	l32i a0, a0, 0
 
 	rsr a0, ZSR_DBLEXC
