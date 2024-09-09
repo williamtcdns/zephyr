@@ -1,5 +1,4 @@
-board:
-  name: xt-sim
-  vendor: cdns
+series:
+- name: LX8_HiFi5_L2_Coh_2P
   socs:
   - name: LX8_HiFi5_L2_Coh_2P
