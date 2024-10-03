@@ -38,6 +38,13 @@ void z_prep_c(void)
 	XTENSA_WSR(ZSR_FLUSH_STR, 0);
 #endif
 
+	extern char _memmap_mem_sram_start[];
+	xthal_mpu_set_region_attribute((void *)_memmap_mem_sram_start,
+	                               0x4000000,
+	                               XTHAL_AR_RWXrwx,
+	                               XTHAL_MEM_NON_CACHEABLE | XTHAL_MEM_SYSTEM_SHAREABLE,
+	                               0);
+
 	cpu0->nested = 0;
 
 	/* The asm2 scheme keeps the kernel pointer in a scratch SR

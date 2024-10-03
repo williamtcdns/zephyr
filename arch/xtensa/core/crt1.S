@@ -49,6 +49,10 @@
 	.align 4
 
 _start:
+#if CONFIG_SMP
+	rsr	a1, PRID
+	bnez	a1, z_mp_asm_entry
+#endif
 	/*
 	 *  _start is typically NOT at the beginning of the text segment --
 	 *  it is always called from either the reset vector (__start) or other
