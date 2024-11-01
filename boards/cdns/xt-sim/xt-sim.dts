@@ -5,17 +5,7 @@
  */
 /dts-v1/;
 
-#include "sample_controller.dtsi"
-
 / {
 	model = "xt-sim";
-	compatible = "cdns,xtensa-sample-controller";
-
-	chosen {
-		zephyr,sram = &sram0;
-	};
-};
-
-&cpu0 {
-	clock-frequency = <10000000>;
+	compatible = "cdns,dsp";
 };

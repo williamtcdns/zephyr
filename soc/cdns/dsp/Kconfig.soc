@@ -1,0 +1,12 @@
+# Copyright (c) 2024 Cadence Design Systems, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+config SOC_XTENSA_DSP
+	bool
+
+config SOC
+	default "dsp" if SOC_XTENSA_DSP
+
+config SOC_TOOLCHAIN_NAME
+	string
+	default "dsp" if SOC_XTENSA_DSP
