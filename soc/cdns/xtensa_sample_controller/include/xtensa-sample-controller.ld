@@ -155,21 +155,22 @@ _rom_store_table = 0;
 PROVIDE(_memmap_vecbase_reset = 0x40000000);
 PROVIDE(_memmap_reset_vector = 0x50000000);
 /* Various memory-map dependent cache attribute settings: */
-_memmap_cacheattr_wb_base = 0x00001110;
-_memmap_cacheattr_wt_base = 0x00001110;
-_memmap_cacheattr_bp_base = 0x00002220;
+_memmap_cacheattr_wb_base = 0x00001140;
+_memmap_cacheattr_wt_base = 0x00003340;
+_memmap_cacheattr_bp_base = 0x00004440;
 _memmap_cacheattr_unused_mask = 0xFFFF000F;
-_memmap_cacheattr_wb_trapnull = 0x2222111F;
-_memmap_cacheattr_wba_trapnull = 0x2222111F;
-_memmap_cacheattr_wbna_trapnull = 0x2222111F;
-_memmap_cacheattr_wt_trapnull = 0x2222111F;
-_memmap_cacheattr_bp_trapnull = 0x2222222F;
-_memmap_cacheattr_wb_strict = 0xFFFF111F;
-_memmap_cacheattr_wt_strict = 0xFFFF111F;
-_memmap_cacheattr_bp_strict = 0xFFFF222F;
-_memmap_cacheattr_wb_allvalid = 0x22221112;
-_memmap_cacheattr_wt_allvalid = 0x22221112;
-_memmap_cacheattr_bp_allvalid = 0x22222222;
+_memmap_cacheattr_wb_trapnull = 0x44441140;
+_memmap_cacheattr_wba_trapnull = 0x44441140;
+_memmap_cacheattr_wbna_trapnull = 0x44442240;
+_memmap_cacheattr_wt_trapnull = 0x44443340;
+_memmap_cacheattr_bp_trapnull = 0x44444440;
+_memmap_cacheattr_wb_strict = 0x00001140;
+_memmap_cacheattr_wt_strict = 0x00003340;
+_memmap_cacheattr_bp_strict = 0x00004440;
+_memmap_cacheattr_wb_allvalid = 0x44441144;
+_memmap_cacheattr_wt_allvalid = 0x44443344;
+_memmap_cacheattr_bp_allvalid = 0x44444444;
+_memmap_region_map = 0x0000000E;
 PROVIDE(_memmap_cacheattr_reset = _memmap_cacheattr_wb_trapnull);
 
 SECTIONS
@@ -189,6 +190,7 @@ SECTIONS
   {
     _dram1_rodata_start = ABSOLUTE(.);
     *(.dram1.rodata)
+    . = ALIGN (4);
     _dram1_rodata_end = ABSOLUTE(.);
   } >dram1_0_seg :dram1_0_phdr
 
@@ -203,6 +205,7 @@ SECTIONS
   {
     _dram1_data_start = ABSOLUTE(.);
     *(.dram1.data)
+    . = ALIGN (4);
     _dram1_data_end = ABSOLUTE(.);
   } >dram1_0_seg :dram1_0_phdr
 
@@ -220,6 +223,7 @@ SECTIONS
   {
     _dram0_rodata_start = ABSOLUTE(.);
     *(.dram0.rodata)
+    . = ALIGN (4);
     _dram0_rodata_end = ABSOLUTE(.);
   } >dram0_0_seg :dram0_0_phdr
 
@@ -234,6 +238,7 @@ SECTIONS
   {
     _dram0_data_start = ABSOLUTE(.);
     *(.dram0.data)
+    . = ALIGN (4);
     _dram0_data_end = ABSOLUTE(.);
   } >dram0_0_seg :dram0_0_phdr
 
@@ -251,6 +256,7 @@ SECTIONS
   {
     _WindowVectors_text_start = ABSOLUTE(.);
     KEEP (*(.WindowVectors.text))
+    . = ALIGN (4);
     _WindowVectors_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_0_end = ALIGN(0x8);
   } >iram0_0_seg :iram0_0_phdr
@@ -267,6 +273,7 @@ SECTIONS
   {
     _Level2InterruptVector_text_start = ABSOLUTE(.);
     KEEP (*(.Level2InterruptVector.text))
+    . = ALIGN (4);
     _Level2InterruptVector_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_2_end = ALIGN(0x8);
   } >iram0_2_seg :iram0_2_phdr
@@ -283,6 +290,7 @@ SECTIONS
   {
     _Level3InterruptVector_text_start = ABSOLUTE(.);
     KEEP (*(.Level3InterruptVector.text))
+    . = ALIGN (4);
     _Level3InterruptVector_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_4_end = ALIGN(0x8);
   } >iram0_4_seg :iram0_4_phdr
@@ -299,6 +307,7 @@ SECTIONS
   {
     _Level4InterruptVector_text_start = ABSOLUTE(.);
     KEEP (*(.Level4InterruptVector.text))
+    . = ALIGN (4);
     _Level4InterruptVector_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_6_end = ALIGN(0x8);
   } >iram0_6_seg :iram0_6_phdr
@@ -315,6 +324,7 @@ SECTIONS
   {
     _Level5InterruptVector_text_start = ABSOLUTE(.);
     KEEP (*(.Level5InterruptVector.text))
+    . = ALIGN (4);
     _Level5InterruptVector_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_8_end = ALIGN(0x8);
   } >iram0_8_seg :iram0_8_phdr
@@ -331,6 +341,7 @@ SECTIONS
   {
     _DebugExceptionVector_text_start = ABSOLUTE(.);
     KEEP (*(.DebugExceptionVector.text))
+    . = ALIGN (4);
     _DebugExceptionVector_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_10_end = ALIGN(0x8);
   } >iram0_10_seg :iram0_10_phdr
@@ -347,6 +358,7 @@ SECTIONS
   {
     _NMIExceptionVector_text_start = ABSOLUTE(.);
     KEEP (*(.NMIExceptionVector.text))
+    . = ALIGN (4);
     _NMIExceptionVector_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_12_end = ALIGN(0x8);
   } >iram0_12_seg :iram0_12_phdr
@@ -363,6 +375,7 @@ SECTIONS
   {
     _KernelExceptionVector_text_start = ABSOLUTE(.);
     KEEP (*(.KernelExceptionVector.text))
+    . = ALIGN (4);
     _KernelExceptionVector_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_14_end = ALIGN(0x8);
   } >iram0_14_seg :iram0_14_phdr
@@ -379,6 +392,7 @@ SECTIONS
   {
     _UserExceptionVector_text_start = ABSOLUTE(.);
     KEEP (*(.UserExceptionVector.text))
+    . = ALIGN (4);
     _UserExceptionVector_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_16_end = ALIGN(0x8);
   } >iram0_16_seg :iram0_16_phdr
@@ -395,6 +409,7 @@ SECTIONS
   {
     _DoubleExceptionVector_text_start = ABSOLUTE(.);
     KEEP (*(.DoubleExceptionVector.text))
+    . = ALIGN (4);
     _DoubleExceptionVector_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_18_end = ALIGN(0x8);
   } >iram0_18_seg :iram0_18_phdr
@@ -403,6 +418,7 @@ SECTIONS
   {
     _iram0_text_start = ABSOLUTE(.);
     *(.iram0.literal .iram.literal .iram.text.literal .iram0.text .iram.text)
+    . = ALIGN (4);
     _iram0_text_end = ABSOLUTE(.);
     _memmap_seg_iram0_19_end = ALIGN(0x8);
   } >iram0_19_seg :iram0_19_phdr
@@ -412,6 +428,7 @@ SECTIONS
     __rom_region_start = ABSOLUTE(.);
     _ResetVector_text_start = ABSOLUTE(.);
     KEEP (*(.ResetVector.text))
+    . = ALIGN (4);
     _ResetVector_text_end = ABSOLUTE(.);
     _memmap_seg_srom0_end = ALIGN(0x8);
   } >srom0_seg :srom0_phdr
@@ -424,6 +441,7 @@ SECTIONS
   {
     _srom_rodata_start = ABSOLUTE(.);
     *(.srom.rodata)
+    . = ALIGN (4);
     _srom_rodata_end = ABSOLUTE(.);
   } >srom1_seg :srom1_phdr
 
@@ -431,6 +449,7 @@ SECTIONS
   {
     _srom_text_start = ABSOLUTE(.);
     *(.srom.literal .srom.text)
+    . = ALIGN (4);
     _srom_text_end = ABSOLUTE(.);
     _memmap_seg_srom1_end = ALIGN(0x8);
     __rom_region_end = ABSOLUTE(.);
@@ -441,6 +460,7 @@ SECTIONS
     _image_ram_start = ABSOLUTE(.);
     _sram_rodata_start = ABSOLUTE(.);
     *(.sram.rodata)
+    . = ALIGN (4);
     _sram_rodata_end = ABSOLUTE(.);
   } >RAM :sram0_phdr
 
@@ -449,6 +469,13 @@ SECTIONS
  * zephyr_linker_sources(ROM_SECTIONS ...). Useful for grouping iterable RO structs.
  */
 #include <snippets-rom-sections.ld>
+  .clib.rodata : ALIGN(4)
+  {
+    _clib_rodata_start = ABSOLUTE(.);
+    *(.clib.rodata)
+    . = ALIGN (4);
+    _clib_rodata_end = ABSOLUTE(.);
+  } >RAM :sram0_phdr
 
   .rodata : ALIGN(4)
   {
@@ -501,7 +528,16 @@ SECTIONS
   {
     _sram_text_start = ABSOLUTE(.);
     *(.sram.literal .sram.text)
+    . = ALIGN (4);
     _sram_text_end = ABSOLUTE(.);
+  } >RAM :sram0_phdr
+
+  .clib.text : ALIGN(4)
+  {
+    _clib_text_start = ABSOLUTE(.);
+    *(.clib.literal .clib.text)
+    . = ALIGN (4);
+    _clib_text_end = ABSOLUTE(.);
   } >RAM :sram0_phdr
 
   __text_region_start =  ALIGN(4);
@@ -516,6 +552,7 @@ SECTIONS
     *(.fini.literal)
     KEEP(*(.fini))
     *(.gnu.version)
+    . = ALIGN (4);
     _text_end = ABSOLUTE(.);
     _etext = .;
   } >RAM :sram0_phdr
@@ -525,6 +562,7 @@ SECTIONS
   {
     _sram_data_start = ABSOLUTE(.);
     *(.sram.data)
+    . = ALIGN (4);
     _sram_data_end = ABSOLUTE(.);
   } >RAM :sram0_phdr
 
@@ -535,6 +573,22 @@ SECTIONS
   } >RAM :sram0_phdr
 
 #include <snippets-sections.ld>
+
+  .clib.data : ALIGN(4)
+  {
+    _clib_data_start = ABSOLUTE(.);
+    *(.clib.data)
+    . = ALIGN (4);
+    _clib_data_end = ABSOLUTE(.);
+  } >RAM :sram0_phdr
+
+  .clib.percpu.data : ALIGN(4)
+  {
+    _clib_percpu_data_start = ABSOLUTE(.);
+    *(.clib.percpu.data)
+    . = ALIGN (4);
+    _clib_percpu_data_end = ABSOLUTE(.);
+  } >RAM :sram0_phdr
 
   .data : ALIGN(4)
   {
@@ -596,6 +650,8 @@ SECTIONS
 #ifdef CONFIG_CODE_DATA_RELOCATION
 #include <linker_sram_bss_relocate.ld>
 #endif
+    *(.clib.bss)
+    *(.clib.percpu.bss)
     . = ALIGN (8);
     _bss_end = ABSOLUTE(.);
     _end = ALIGN(0x8);
