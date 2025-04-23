@@ -243,6 +243,13 @@ _start:
 	CALL	z_save_bootargs
 #endif  // CONFIG_BOARD_XT_SIM
 
+#if defined(CONFIG_XTENSA_LIBC)
+	rsr     a5, PRID
+	bnez    a5, 1f
+	CALL    _init_reent_bss
+1:
+#endif
+
 	/* Enter C domain, never returns from here */
 	CALL	z_prep_c
 
