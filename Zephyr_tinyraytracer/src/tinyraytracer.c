@@ -326,5 +326,6 @@ int main() {
     GL_init();
     GL_scan_RGBf(GL_width, GL_height, render);
     GL_terminate();
+    exit(0);
     return 0;
 }
