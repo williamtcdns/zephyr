@@ -321,6 +321,74 @@ void render(int x, int y, float* r, float* g, float* b) {
 }
 
 
+#ifdef __ZEPHYR__
+
+#include <zephyr/kernel.h>
+
+static atomic_t busy_cntr;
+
+static K_SEM_DEFINE(main_sem, 0, 1);
+
+static atomic_t y_nxt = ATOMIC_INIT(0);
+
+static void scan_RGBf_thrd_fn (void *, void *, void *) {
+	for (uintptr_t j; (j = atomic_add(&y_nxt, 2)) < GL_height;) {
+		for (uintptr_t i = 0; i < GL_width; ++i) {
+			float fr1, fg1, fb1;
+			render(i,j,&fr1,&fg1,&fb1);
+			uint8_t r1 = GL_ftoi(fr1);
+			uint8_t g1 = GL_ftoi(fg1);
+			uint8_t b1 = GL_ftoi(fb1);
+			float fr2, fg2, fb2;
+			render(i,j+1,&fr2,&fg2,&fb2);
+			uint8_t r2 = GL_ftoi(fr2);
+			uint8_t g2 = GL_ftoi(fg2);
+			uint8_t b2 = GL_ftoi(fb2);
+			GL_set2pixelsRGB(i+1,j/2+1,r1,g1,b1,r2,g2,b2);
+		}
+	}
+	if (atomic_dec(&busy_cntr) == 1)
+		k_sem_give(&main_sem);
+}
+
+#define NTHRD_MIN 1
+#define NTHRD_MAX 8
+#define STACK_SIZE 2048
+
+static K_THREAD_STACK_ARRAY_DEFINE(tstack, NTHRD_MAX, STACK_SIZE);
+static struct k_thread tthread[NTHRD_MAX];
+
+int main() {
+	init_scene();
+	GL_init();
+	uintptr_t ncpu = arch_num_cpus();
+	uintptr_t nthrd =
+		(ncpu < NTHRD_MIN) ? NTHRD_MIN :
+		((ncpu < (GL_height/2)) ? ncpu : (GL_height/2));
+	nthrd = ((nthrd > NTHRD_MAX) ? NTHRD_MAX : nthrd);
+	busy_cntr = nthrd;
+	// Capture start timestamp.
+	uintptr_t start_time = k_cycle_get_32();
+	for (uintptr_t i = 0; i < nthrd; ++i) {
+		k_thread_create(&tthread[i], tstack[i], STACK_SIZE,
+			        scan_RGBf_thrd_fn, NULL, NULL, NULL,
+			        0, 0, K_NO_WAIT);
+	}
+	// Wait for all workers to finish their rendering.
+	k_sem_take(&main_sem, K_FOREVER);
+	// Capture end timestamp.
+	uintptr_t end_time = k_cycle_get_32();
+	GL_terminate();
+	uintptr_t cycles_spent = (end_time - start_time);
+	uintptr_t milliseconds_spent = ((cycles_spent * 1000) / sys_clock_hw_cycles_per_sec());
+	printf("Completed %ux%u in %u ms by %u thread(s)\n",
+		GL_width, GL_height, (unsigned)milliseconds_spent, (unsigned)nthrd);
+	exit(0);
+	return 0;
+}
+
+#else
+
 int main() {
     init_scene();
     GL_init();
@@ -329,3 +397,5 @@ int main() {
     exit(0);
     return 0;
 }
+
+#endif
