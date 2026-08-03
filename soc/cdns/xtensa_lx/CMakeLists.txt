@@ -14,10 +14,27 @@ zephyr_library_sources(config_check.c)
 find_program(XT_CLANG xt-clang)
 
 if(XT_CLANG)
-  # Derive the core-specific build root from $XTENSA_SYSTEM (already set by
-  # the build environment: .../builds/<ver>/<core>/config).  Its parent is
-  # the core build root where xtensa-elf/lib/sim-mc/ lives.
-  set(XT_CORE_ROOT "$ENV{XTENSA_SYSTEM}/..")
+  # Derive the core-specific build root authoritatively via
+  # 'xt-clang --show-config=config', which returns the real per-core build
+  # directory (.../builds/<ver>/<core>) where src/config/core.h and
+  # xtensa-elf/lib/sim-mc/ live.  Do NOT rely on $XTENSA_SYSTEM/.. : in some
+  # environments XTENSA_SYSTEM points at the generic XtensaTools/config
+  # instead of a per-core build, which breaks IPI/MPU/ldscript detection.
+  execute_process(
+    COMMAND ${XT_CLANG} --show-config=config
+    OUTPUT_VARIABLE _xt_cfg_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _xt_cfg_rc
+    ERROR_QUIET
+  )
+  if(_xt_cfg_rc EQUAL 0 AND _xt_cfg_dir)
+    set(XT_CORE_ROOT "${_xt_cfg_dir}")
+  else()
+    # Fallback: legacy derivation from $XTENSA_SYSTEM (.../<core>/config).
+    message(WARNING "xtensa_lx: 'xt-clang --show-config=config' failed "
+                    "(rc=${_xt_cfg_rc}), falling back to $XTENSA_SYSTEM/..")
+    set(XT_CORE_ROOT "$ENV{XTENSA_SYSTEM}/..")
+  endif()
   get_filename_component(XT_CORE_ROOT "${XT_CORE_ROOT}" ABSOLUTE)
 
   if(IS_DIRECTORY "${XT_CORE_ROOT}")
@@ -33,32 +50,21 @@ if(XT_CLANG)
     endif()
 
     # -------------------------------------------------------------------
-    # Detect MPU support: query config dir via xt-clang --show-config=config,
-    # then read core.h and check for XCHAL_HAVE_MPU 1.
+    # Detect MPU support: read core.h from the core build root and check
+    # for XCHAL_HAVE_MPU 1.
     # -------------------------------------------------------------------
-    execute_process(
-      COMMAND ${XT_CLANG} --show-config=config
-      OUTPUT_VARIABLE _xt_cfg_dir
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      RESULT_VARIABLE _xt_cfg_rc
-      ERROR_QUIET
-    )
-    if(_xt_cfg_rc EQUAL 0 AND _xt_cfg_dir)
-      set(_xt_mpu_core_h "${_xt_cfg_dir}/src/config/core.h")
-      if(EXISTS "${_xt_mpu_core_h}")
-        file(STRINGS "${_xt_mpu_core_h}" _mpu_def
-             REGEX "^#define[ \t]+XCHAL_HAVE_MPU[ \t]+1")
-        if(_mpu_def)
-          message(STATUS "xtensa_lx: XCHAL_HAVE_MPU=1 detected, adding mpu_table.c")
-          zephyr_library_sources(mpu_table.c)
-        else()
-          message(STATUS "xtensa_lx: XCHAL_HAVE_MPU not set, skipping mpu_table.c")
-        endif()
+    set(_xt_mpu_core_h "${XT_CORE_ROOT}/src/config/core.h")
+    if(EXISTS "${_xt_mpu_core_h}")
+      file(STRINGS "${_xt_mpu_core_h}" _mpu_def
+           REGEX "^#define[ \t]+XCHAL_HAVE_MPU[ \t]+1")
+      if(_mpu_def)
+        message(STATUS "xtensa_lx: XCHAL_HAVE_MPU=1 detected, adding mpu_table.c")
+        zephyr_library_sources(mpu_table.c)
       else()
-        message(WARNING "xtensa_lx: core.h not found: ${_xt_mpu_core_h}, skipping mpu_table.c")
+        message(STATUS "xtensa_lx: XCHAL_HAVE_MPU not set, skipping mpu_table.c")
       endif()
     else()
-      message(WARNING "xtensa_lx: 'xt-clang --show-config=config' failed (rc=${_xt_cfg_rc}), skipping mpu_table.c")
+      message(WARNING "xtensa_lx: core.h not found: ${_xt_mpu_core_h}, skipping mpu_table.c")
     endif()
 
     if(CONFIG_SMP)
