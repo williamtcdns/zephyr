@@ -86,7 +86,7 @@ if(XT_CLANG)
 
     if(EXISTS "${LD_SCRIPT_SRC}")
       # -----------------------------------------------------------------
-      # Step 1: Generate linker script from toolchain's elf32xtensa.x
+      # Generate linker script from toolchain's elf32xtensa.x
       # -----------------------------------------------------------------
       message(STATUS "xtensa_lx: Generating linker script from ${LD_SCRIPT_SRC}")
       execute_process(
@@ -101,28 +101,6 @@ if(XT_CLANG)
         message(WARNING "xtensa_lx: ldscriptconv.py failed: ${_ldconv_err}")
       else()
         message(STATUS "xtensa_lx: Linker script written to ${LD_SCRIPT_DST}")
-      endif()
-
-      # -----------------------------------------------------------------
-      # Step 2: Update xtensa_lx.dtsi SRAM base and size.
-      # Uses the same elf32xtensa.x so the dtsi always matches the core.
-      # -----------------------------------------------------------------
-      set(DTSI_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../../../dts/xtensa/xtensa_lx.dtsi")
-      if(EXISTS "${DTSI_FILE}")
-        message(STATUS "xtensa_lx: Updating SRAM base/size in xtensa_lx.dtsi")
-        execute_process(
-          COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/update_dtsi.py
-                  --ldscript ${LD_SCRIPT_SRC}
-                  --dtsi     ${DTSI_FILE}
-          RESULT_VARIABLE _dtsi_rc
-          OUTPUT_VARIABLE _dtsi_out
-          ERROR_VARIABLE  _dtsi_err
-        )
-        if(NOT _dtsi_rc EQUAL 0)
-          message(WARNING "xtensa_lx: update_dtsi.py failed: ${_dtsi_err}")
-        else()
-          message(STATUS "${_dtsi_out}")
-        endif()
       endif()
 
     else()

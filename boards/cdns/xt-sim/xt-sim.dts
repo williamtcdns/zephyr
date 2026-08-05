@@ -5,17 +5,6 @@
  */
 /dts-v1/;
 
-#include "xtensa_lx.dtsi"
-
 / {
 	model = "xt-sim";
-	compatible = "cdns,xtensa_lx";
-
-	chosen {
-		zephyr,sram = &sram0;
-	};
-};
-
-&cpu0 {
-	clock-frequency = <10000000>;
 };
